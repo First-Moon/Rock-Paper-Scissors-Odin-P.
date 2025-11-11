@@ -51,7 +51,7 @@ function playRound(humanSelection, computerSelection, scores) {
     let resultMessage = "";
 
     if (humanSelection === computerSelection)
-        resultMessage = `Tie + ${humanSelection}`;
+        resultMessage = `Tie `;
     else if (
         (humanSelection === 'rock' && computerSelection === 'scissors') ||
         (humanSelection === 'paper' && computerSelection === 'rock') || 
