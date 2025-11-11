@@ -1,3 +1,13 @@
+let humanScore = 0; // MODIFIED: Made global
+let computerScore = 0; // MODIFIED: Made global
+const MAX_SCORE = 5;
+
+// ADDED: References to HTML elements
+const buttons = document.querySelectorAll('#choices button'); 
+const roundMessage = document.getElementById('round-message');
+const scoreDisplay = document.querySelector('#results p:first-child');
+const finalWinnerDisplay = document.getElementById('final-winner');
+
 //getComputerChoice
 function getComputerChoice() {
     const choice = [ "rock" , "paper" , "scissors" ];
@@ -5,96 +15,64 @@ function getComputerChoice() {
     return choice[randomIndex];
   }
 
-//getHumanChoice
-function getHumanChoice() {
-    let humanChoice;
-    let isValidChoice = false;
 
-    // Loop until a valid choice is made
-    while (!isValidChoice) {
-        // Prompt for the user's input
-        humanChoice = prompt("Choose Rock, Paper, or Scissors (or type 'cancel' to exit):");
+//play a round
+function playRound(humanSelection) {
 
-        // Handle case where user clicks Cancel or enters nothing
-        if (humanChoice === null || humanChoice.trim() === '') {
-            console.log("Game cancelled.");
-            return null;
-        }
-
-        // Standardize the input (lowercase and remove extra spaces)
-        humanChoice = humanChoice.toLowerCase().trim();
-
-        // Check if the choice is valid
-        if (humanChoice === 'rock' || humanChoice === 'paper' || humanChoice === 'scissors') {
-            isValidChoice = true; // Exit the loop
-            return humanChoice;
-        } else {
-            // Give feedback for invalid input
-            console.log(`"${humanChoice}" is not a valid choice. Please try again.`);
-        }
+    if (humanScore === MAX_SCORE || computerScore === MAX_SCORE ) {
+        return;
     }
-}
-
-//play game
-function playgame() {
-    let scores ={
-        humanScore: 0,
-        computerScore: 0
-    };
-    const roundsToPlay = 5;
-
-    console.log("Start game Rock , Paper , Scissors 5 Rounds")
-
-    //play a round
-
-function playRound(humanSelection, computerSelection, scores) {
+    
+    const computerSelection = getComputerChoice();
     let resultMessage = "";
 
-    if (humanSelection === computerSelection)
-        resultMessage = `Tie`;
+    // Normalize selection (if you're not doing it before calling, though button IDs are likely lowercase)
+    const human = humanSelection.toLowerCase();
+
+    if (human === computerSelection) {
+        resultMessage = `It's a Tie Both choose ${human}`;
+    }
     else if (
-        (humanSelection === 'rock' && computerSelection === 'scissors') ||
-        (humanSelection === 'paper' && computerSelection === 'rock') || 
-        ( humanSelection === 'scissors' && computerSelection === 'paper') )
-        {
-        scores.humanScore++;
-        resultMessage = `You win because + ${humanSelection} + Win + ${computerSelection}`;
+        (human === 'rock' && computerSelection === 'scissors') ||
+        (human === 'paper' && computerSelection === 'rock') ||
+        (human === 'scissors' && computerSelection === 'paper')
+    )
+    {
+        humanScore++; //Use global score
+        resultMessage = `You Win ${human} beats ${computerSelection}.`;   
     }
     else {
-        scores.computerScore++;
-        resultMessage = `You Lose because + ${computerSelection} + Win + ${computerSelection}`;
+        computerScore++;
+        resultMessage = `You lose ${computerSelection} beats ${human}.`;
     }
-
-    console.log(`result: ${resultMessage}`);
-  }
+    //Use DOM Output
+    roundMessage.textContent = resultMessage;
+    scoreDisplay.textContent = `Current Score: Player ${humanScore} - Computer ${computerScore}`;
     
-    for (let i = 1; i <= roundsToPlay; i++) {
-        console.log(`\n*** Round ${i} ***`);
+    //Add Win Check
+    checkWinner(); 
+}
 
-        const humanChoice = getHumanChoice();
-        const computerChoice = getComputerChoice();
-
-        if (humanChoice === null) {
-            console.log("You Stop Game");
-            return;
-        }
-
-        console.log(`You Choose ${humanChoice}`);
-        console.log(`Computer Choose ${computerChoice}`);
-
-        playRound(humanChoice, computerChoice, scores);
-
-        console.log(`Score: You${scores.humanScore} - Computer${scores.computerScore}`);
-    }
-
-    console.log("\n--5 Rounds End--");
-    if(scores.humanScore > scores.computerScore){
-        console.log(`You win the game with ${scores.humanScore} ต่อ ${scores.computerScore} `)
-    }
-    else if(scores.humanScore < scores.computerScore){
-        console.log(`You lose the game with ${scores.humanScore} ต่อ ${scores.computerScore} `)
-    }
-    else {
-        console.log(`You tie with ${scores.humanScore} ต่อ ${scores.computerScore} `);
+function checkWinner() {
+    if (humanScore === MAX_SCORE) {
+        finalWinnerDisplay.textContent = "**GAME OVER: You are the GRAND WINNER!**";
+        disableButtons();
+    } else if (computerScore === MAX_SCORE) {
+        finalWinnerDisplay.textContent = "**GAME OVER: The Computer wins!**";
+        disableButtons();
     }
 }
+
+function disableButtons() {
+    buttons.forEach(button => {
+        button.disabled = true;
+    });
+}
+
+buttons.forEach(button => {
+    button.addEventListener('click', () => {
+        // When a button is clicked, call playRound and pass the button's ID 
+        // (which should be 'rock', 'paper', or 'scissors')
+        playRound(button.id);
+    });
+});
